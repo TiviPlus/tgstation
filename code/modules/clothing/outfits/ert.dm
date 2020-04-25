@@ -448,4 +448,4 @@
 	W.access += ACCESS_WEAPONS
 	W.assignment = "Pizza Deivery Guy"
 	W.update_label()
-	..()
+	return ..()
