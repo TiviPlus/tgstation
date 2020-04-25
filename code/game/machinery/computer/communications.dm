@@ -332,7 +332,7 @@
 		if("pizza")	//OPERATION BREADSTICK IS A GO
 			if(authenticated)
 				var/input = stripped_input(usr, "Please enter the location for delivering the pizza. Delivery not guaranteed.", "Pizza Request.","")
-				if(!input || !(usr in view(1,src)))
+				if(!input || !user.Adjacent(src))
 					return
 				var/datum/bank_account/D = SSeconomy.get_dep_account(ACCOUNT_CAR)
 				if(D.account_balance < 20000)	//so people dont spam pizzamen
