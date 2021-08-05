@@ -56,6 +56,7 @@
 	plane = GAME_PLANE
 	appearance_flags = PLANE_MASTER //should use client color
 	blend_mode = BLEND_OVERLAY
+	render_target = "*main"
 
 /atom/movable/screen/plane_master/game_world/backdrop(mob/mymob)
 	if(istype(mymob) && mymob.client && mymob.client.prefs && mymob.client.prefs.ambientocclusion)
@@ -108,6 +109,7 @@
 ///Contains all lighting objects
 /atom/movable/screen/plane_master/lighting
 	name = "lighting plane master"
+	//render_target = "*lights"
 	plane = LIGHTING_PLANE
 	blend_mode = BLEND_MULTIPLY
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
@@ -187,3 +189,64 @@
 	filters = list()
 	if(istype(mymob) && mymob.client?.prefs?.ambientocclusion)
 		add_filter("AO", 1, drop_shadow_filter(x = 0, y = -2, size = 4, color = "#04080FAA"))
+
+/atom/movable/screen/plane_master/displacer
+	screen_loc = "CENTER"
+	plane = -11 //varedit something to this plane to apply the filter, currently only works on stuff rendered to the superowner plane
+	render_target = "*ripple"
+	icon = 'icons/effects/light_overlays/light_352.dmi'  //placeholder
+	icon_state = "light"
+	color = "#000"
+	alpha = 255
+
+/atom/movable/screen/plane_master/displacer/Initialize(mapload)
+	. = ..()
+	add_filter("ripple", 1, ripple_filter(size = 20, radius = 10))
+
+/atom/movable/screen/plane_master/superowner
+	//if you want something to render here make an object on this plane with a render source belonging to a different plane
+	render_source = "*main"
+	plane = 9998
+
+/atom/movable/screen/plane_master/superowner/Initialize(mapload)
+	. = ..()
+	add_filter("displacer", 1, displacement_map_filter(render_source = "*ripple", size = 20))
+
+/atom/movable/screen/plane_master/darkness
+	plane = BLACKNESS_PLANE
+	render_target = "*dark"
+
+
+/obj/singularity/Initialize(mapload, starting_energy)
+	. = ..()
+	plane = -10
+
+/client/verb/ughtizbznzi()
+	set name = "spawn rendertargetobjs"
+	set category = "bhggg"
+
+	var/obj/O = new(mob.loc)
+	O.plane = 9998
+	O.render_source = "*dark"
+	O = new(mob.loc)
+	O.plane = 9998
+	O.render_source = "*light"
+
+/client/verb/bvjsbivniron()
+	set name = "spawn filter example"
+	set category = "bhggg"
+
+	var/obj/O = new(mob.loc)
+	O.plane = -11
+	O.icon = 'icons/effects/light_overlays/light_352.dmi'
+	O.icon_state = "light"
+
+///Todo list:
+//plane controllers should be responsible for these effects, ie move behaviour from plane_master to plane_controller
+//plane controllers automatically fetch render targets and create them if they do not exist
+//most if not all objects should render onto a controller
+//remove unused render targets
+//bugs:
+//mouse opacity changes(?) for some reason, probably some wrongly set var somewhere
+//lighting does not play nice, and will csause popin when you go near a dark wall
+//ghosts go under walls, should be fixed by adding their plane to controlled planes
