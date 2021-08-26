@@ -6,6 +6,11 @@
 	var/show_alpha = 255
 	var/hide_alpha = 0
 
+/atom/movable/screen/plane_master/Initialize(mapload)
+	. = ..()
+	if(!render_target)
+		render_target = "*[plane]"
+
 /atom/movable/screen/plane_master/proc/Show(override)
 	alpha = override || show_alpha
 
@@ -55,8 +60,8 @@
 	name = "game world plane master"
 	plane = GAME_PLANE
 	appearance_flags = PLANE_MASTER //should use client color
-	blend_mode = BLEND_OVERLAY
 	render_target = "*main"
+	blend_mode = BLEND_OVERLAY
 
 /atom/movable/screen/plane_master/game_world/backdrop(mob/mymob)
 	if(istype(mymob) && mymob.client && mymob.client.prefs && mymob.client.prefs.ambientocclusion)
@@ -205,6 +210,7 @@
 
 /atom/movable/screen/plane_master/superowner
 	//if you want something to render here make an object on this plane with a render source belonging to a different plane
+	appearance_flags = PASS_MOUSE | PLANE_MASTER | NO_CLIENT_COLOR
 	render_source = "*main"
 	plane = 9998
 
@@ -225,12 +231,12 @@
 	set name = "spawn rendertargetobjs"
 	set category = "bhggg"
 
-	var/obj/O = new(mob.loc)
-	O.plane = 9998
-	O.render_source = "*dark"
-	O = new(mob.loc)
-	O.plane = 9998
-	O.render_source = "*light"
+	for(var/i in mob.hud_used.plane_masters)
+		var/atom/movable/screen/plane_master/instance = mob.hud_used.plane_masters["[i]"]
+		var/obj/O = new(mob.loc)
+		O.plane = 9998
+		O.appearance_flags = PASS_MOUSE | PLANE_MASTER | NO_CLIENT_COLOR
+		O.render_source = instance.render_target
 
 /client/verb/bvjsbivniron()
 	set name = "spawn filter example"
@@ -247,6 +253,6 @@
 //most if not all objects should render onto a controller
 //remove unused render targets
 //bugs:
-//mouse opacity changes(?) for some reason, probably some wrongly set var somewhere
+//mouse opacity changes(?) for some reason, probably some wrongly set var somewhere --fixed
 //lighting does not play nice, and will csause popin when you go near a dark wall
 //ghosts go under walls, should be fixed by adding their plane to controlled planes
