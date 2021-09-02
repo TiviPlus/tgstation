@@ -6,11 +6,6 @@
 	var/show_alpha = 255
 	var/hide_alpha = 0
 
-/atom/movable/screen/plane_master/Initialize(mapload)
-	. = ..()
-	if(!render_target)
-		render_target = "*[plane]"
-
 /atom/movable/screen/plane_master/proc/Show(override)
 	alpha = override || show_alpha
 
@@ -41,6 +36,7 @@
 	name = "floor plane master"
 	plane = FLOOR_PLANE
 	appearance_flags = PLANE_MASTER
+	render_target = "*floor"
 	blend_mode = BLEND_OVERLAY
 
 /atom/movable/screen/plane_master/over_tile
@@ -114,7 +110,7 @@
 ///Contains all lighting objects
 /atom/movable/screen/plane_master/lighting
 	name = "lighting plane master"
-	//render_target = "*lights"
+	render_target = "*lights"
 	plane = LIGHTING_PLANE
 	blend_mode = BLEND_MULTIPLY
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
@@ -196,6 +192,7 @@
 		add_filter("AO", 1, drop_shadow_filter(x = 0, y = -2, size = 4, color = "#04080FAA"))
 
 /atom/movable/screen/plane_master/displacer
+	name = "displacer plane master"
 	screen_loc = "CENTER"
 	plane = -11 //varedit something to this plane to apply the filter, currently only works on stuff rendered to the superowner plane
 	render_target = "*ripple"
@@ -211,16 +208,17 @@
 /atom/movable/screen/plane_master/superowner
 	//if you want something to render here make an object on this plane with a render source belonging to a different plane
 	appearance_flags = PASS_MOUSE | PLANE_MASTER | NO_CLIENT_COLOR
-	render_source = "*main"
-	plane = 9998
+	//render_source = "*SIPER"
+	plane = 750
 
 /atom/movable/screen/plane_master/superowner/Initialize(mapload)
 	. = ..()
-	add_filter("displacer", 1, displacement_map_filter(render_source = "*ripple", size = 20))
+	//add_filter("displacer", 1, displacement_map_filter(render_source = "*ripple", size = 20))
+	GLOB.superowner += src
 
 /atom/movable/screen/plane_master/darkness
+	name = "darkness plane master"
 	plane = BLACKNESS_PLANE
-	render_target = "*dark"
 
 
 /obj/singularity/Initialize(mapload, starting_energy)
@@ -228,15 +226,83 @@
 	plane = -10
 
 /client/verb/ughtizbznzi()
-	set name = "spawn rendertargetobjs"
+	set name = "spawn render source objs"
 	set category = "bhggg"
-
 	for(var/i in mob.hud_used.plane_masters)
 		var/atom/movable/screen/plane_master/instance = mob.hud_used.plane_masters["[i]"]
-		var/obj/O = new(mob.loc)
-		O.plane = 9998
-		O.appearance_flags = PASS_MOUSE | PLANE_MASTER | NO_CLIENT_COLOR
+		if(istype(i, /atom/movable/screen/plane_master/superowner))
+			continue
+		if(instance.render_target)
+			if(instance.render_target != "*lights" && instance.render_target != "*main" && instance.render_target != "*floor")
+				continue
+		var/obj/PM = new()
+		PM.plane = 750
+		PM.layer = instance.plane += 2000
+		PM.blend_mode = instance.blend_mode
+		//instance.blend_mode = BLEND_DEFAULT
+		if(instance.blend_mode == BLEND_OVERLAY)
+			PM.appearance_flags = PASS_MOUSE | NO_CLIENT_COLOR
+			instance.blend_mode = BLEND_OVERLAY
+		if(!instance.render_target)
+			instance.render_target = "*"+instance.name
+		PM.alpha = instance.alpha
+		PM.add_filter("emissives", 1, alpha_mask_filter(render_source = EMISSIVE_RENDER_TARGET, flags = MASK_INVERSE))
+		PM.name = instance.name
+		PM.render_source = instance.render_target
+		GLOB.mastertests += PM
+	screen += GLOB.mastertests
+	return
+	var/list/soup = list()
+	var/obj/O = new()
+	O.plane = 750
+	O.layer = 1
+	O.render_source = "*main"
+	O.appearance_flags = PASS_MOUSE | NO_CLIENT_COLOR
+	O.screen_loc = "CENTER"
+	soup += O
+	O = new()
+	O.plane = 750
+	O.render_source = "*floor"
+	O.layer = 0
+	O.screen_loc = "CENTER"
+	soup += O
+	O.appearance_flags = PASS_MOUSE | NO_CLIENT_COLOR
+	O = new()
+	O.plane = 750
+	O.render_source = "*lights"
+	O.layer = 2
+	O.screen_loc = "CENTER"
+	O.blend_mode = BLEND_MULTIPLY
+	O.appearance_flags = PASS_MOUSE | NO_CLIENT_COLOR
+	soup += O
+	screen += soup
+
+	/*
+	for(var/i in mob.hud_used.plane_masters)
+		var/atom/movable/screen/plane_master/instance = mob.hud_used.plane_masters["[i]"]
+		if(istype(i, /atom/movable/screen/plane_master/superowner))
+			continue
+		var/atom/movable/screen/plane_master/O = new(mob.loc)
+		O.plane = 750
+		O.layer = instance.plane + 1000
+		O.appearance_flags = PASS_MOUSE | NO_CLIENT_COLOR
 		O.render_source = instance.render_target
+		GLOB.mastertests += O
+	*/
+
+GLOBAL_LIST_EMPTY(mastertests)
+
+GLOBAL_LIST_EMPTY(superowner)
+
+/client/verb/u34959nfj3()
+	set name = "toggle change blend mode"
+	set category = "bhggg"
+
+	for(var/obj/i in GLOB.mastertests)
+		if(i.blend_mode == BLEND_MULTIPLY)
+			i.blend_mode = BLEND_DEFAULT
+		else
+			i.blend_mode = BLEND_MULTIPLY
 
 /client/verb/bvjsbivniron()
 	set name = "spawn filter example"
