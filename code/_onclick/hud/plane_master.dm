@@ -207,8 +207,7 @@
 
 /atom/movable/screen/plane_master/superowner
 	//if you want something to render here make an object on this plane with a render source belonging to a different plane
-	appearance_flags = PASS_MOUSE | PLANE_MASTER | NO_CLIENT_COLOR
-	//render_source = "*SIPER"
+	appearance_flags =  PLANE_MASTER
 	plane = 750
 
 /atom/movable/screen/plane_master/superowner/Initialize(mapload)
@@ -228,6 +227,7 @@
 /client/verb/ughtizbznzi()
 	set name = "spawn render source objs"
 	set category = "bhggg"
+
 	for(var/i in mob.hud_used.plane_masters)
 		var/atom/movable/screen/plane_master/instance = mob.hud_used.plane_masters["[i]"]
 		if(istype(i, /atom/movable/screen/plane_master/superowner))
@@ -235,23 +235,23 @@
 		if(instance.render_target)
 			if(instance.render_target != "*lights" && instance.render_target != "*main" && instance.render_target != "*floor")
 				continue
+		sleep(10)
+		to_chat(mob, "adding [instance]")
 		var/obj/PM = new()
 		PM.plane = 750
 		PM.layer = instance.plane += 2000
+		if(PM.layer < 0)
+			world.log << "j"
 		PM.blend_mode = instance.blend_mode
-		//instance.blend_mode = BLEND_DEFAULT
-		if(instance.blend_mode == BLEND_OVERLAY)
-			PM.appearance_flags = PASS_MOUSE | NO_CLIENT_COLOR
-			instance.blend_mode = BLEND_OVERLAY
 		if(!instance.render_target)
 			instance.render_target = "*"+instance.name
 		PM.alpha = instance.alpha
-		PM.add_filter("emissives", 1, alpha_mask_filter(render_source = EMISSIVE_RENDER_TARGET, flags = MASK_INVERSE))
 		PM.name = instance.name
 		PM.render_source = instance.render_target
 		GLOB.mastertests += PM
 	screen += GLOB.mastertests
 	return
+	/*
 	var/list/soup = list()
 	var/obj/O = new()
 	O.plane = 750
@@ -275,20 +275,7 @@
 	O.blend_mode = BLEND_MULTIPLY
 	O.appearance_flags = PASS_MOUSE | NO_CLIENT_COLOR
 	soup += O
-	screen += soup
-
-	/*
-	for(var/i in mob.hud_used.plane_masters)
-		var/atom/movable/screen/plane_master/instance = mob.hud_used.plane_masters["[i]"]
-		if(istype(i, /atom/movable/screen/plane_master/superowner))
-			continue
-		var/atom/movable/screen/plane_master/O = new(mob.loc)
-		O.plane = 750
-		O.layer = instance.plane + 1000
-		O.appearance_flags = PASS_MOUSE | NO_CLIENT_COLOR
-		O.render_source = instance.render_target
-		GLOB.mastertests += O
-	*/
+	screen += soup*/
 
 GLOBAL_LIST_EMPTY(mastertests)
 
