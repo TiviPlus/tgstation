@@ -217,6 +217,7 @@
 
 /atom/movable/screen/plane_master/darkness
 	name = "darkness plane master"
+	render_target = "*dark"
 	plane = BLACKNESS_PLANE
 
 
@@ -227,7 +228,7 @@
 /client/verb/ughtizbznzi()
 	set name = "spawn render source objs"
 	set category = "bhggg"
-
+/*
 	for(var/i in mob.hud_used.plane_masters)
 		var/atom/movable/screen/plane_master/instance = mob.hud_used.plane_masters["[i]"]
 		if(istype(i, /atom/movable/screen/plane_master/superowner))
@@ -240,24 +241,24 @@
 		var/obj/PM = new()
 		PM.plane = 750
 		PM.layer = instance.plane += 2000
-		if(PM.layer < 0)
-			world.log << "j"
 		PM.blend_mode = instance.blend_mode
 		if(!instance.render_target)
 			instance.render_target = "*"+instance.name
 		PM.alpha = instance.alpha
 		PM.name = instance.name
+		PM.appearance_flags = PASS_MOUSE | NO_CLIENT_COLOR | KEEP_TOGETHER
 		PM.render_source = instance.render_target
+		PM.screen_loc = "CENTER"
 		GLOB.mastertests += PM
 	screen += GLOB.mastertests
-	return
-	/*
+	return*/
+
 	var/list/soup = list()
 	var/obj/O = new()
 	O.plane = 750
 	O.layer = 1
 	O.render_source = "*main"
-	O.appearance_flags = PASS_MOUSE | NO_CLIENT_COLOR
+	O.appearance_flags = PASS_MOUSE | NO_CLIENT_COLOR | KEEP_TOGETHER
 	O.screen_loc = "CENTER"
 	soup += O
 	O = new()
@@ -266,16 +267,24 @@
 	O.layer = 0
 	O.screen_loc = "CENTER"
 	soup += O
-	O.appearance_flags = PASS_MOUSE | NO_CLIENT_COLOR
+	O.appearance_flags = PASS_MOUSE | NO_CLIENT_COLOR | KEEP_TOGETHER
 	O = new()
 	O.plane = 750
 	O.render_source = "*lights"
+	O.layer = 3
+	O.screen_loc = "CENTER"
+	O.blend_mode = BLEND_MULTIPLY
+	O.appearance_flags = PASS_MOUSE | NO_CLIENT_COLOR | KEEP_TOGETHER
+	soup += O
+	O = new()
+	O.plane = 750
+	O.render_source = "*dark"
 	O.layer = 2
 	O.screen_loc = "CENTER"
 	O.blend_mode = BLEND_MULTIPLY
-	O.appearance_flags = PASS_MOUSE | NO_CLIENT_COLOR
+	O.appearance_flags = PASS_MOUSE | NO_CLIENT_COLOR | KEEP_TOGETHER
 	soup += O
-	screen += soup*/
+	screen += soup
 
 GLOBAL_LIST_EMPTY(mastertests)
 
@@ -306,6 +315,5 @@ GLOBAL_LIST_EMPTY(superowner)
 //most if not all objects should render onto a controller
 //remove unused render targets
 //bugs:
-//mouse opacity changes(?) for some reason, probably some wrongly set var somewhere --fixed
-//lighting does not play nice, and will csause popin when you go near a dark wall
-//ghosts go under walls, should be fixed by adding their plane to controlled planes
+//mouse opacity changes(?) for some reason, probably some wrongly set var somewhere --fixed use pass mouse
+//lighting does not play nice, and will csause popin when you go near a dark wall - something about objs is borked
