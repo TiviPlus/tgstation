@@ -5,6 +5,7 @@
 	var/list/testmerge = list()
 
 /datum/getrev/New()
+	return
 	commit = rustg_git_revparse("HEAD")
 	if(commit)
 		date = rustg_git_commit_date(commit)
