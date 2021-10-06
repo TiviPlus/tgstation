@@ -168,9 +168,20 @@
 	color = "#000000"
 	show_when_dead = TRUE
 
+/atom/movable/screen/fullscreen/dark_backdrop
+	icon = 'icons/hud/screen_full.dmi'
+	icon_state = "backdrop"
+	transform = matrix(200, 0, 0, 0, 200, 0)
+	plane = BLACKNESS_PLANE
+	color = "#000"
+	layer = BACKGROUND_LAYER+21
+	blend_mode = BLEND_OVERLAY
+	show_when_dead = TRUE
+
+
 /atom/movable/screen/fullscreen/lighting_backdrop
-	icon = 'icons/hud/screen_gen.dmi'
-	icon_state = "flash"
+	icon = 'icons/hud/screen_full.dmi'
+	icon_state = "backdrop"
 	transform = matrix(200, 0, 0, 0, 200, 0)
 	plane = LIGHTING_PLANE
 	blend_mode = BLEND_OVERLAY
