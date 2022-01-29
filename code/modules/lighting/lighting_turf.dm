@@ -98,6 +98,7 @@
 				lighting_build_overlay()
 			else
 				lighting_clear_overlay()
+
 	//Inherit overlay of new area
 	if(old_area.lighting_effect)
 		cut_overlay(old_area.lighting_effect)
